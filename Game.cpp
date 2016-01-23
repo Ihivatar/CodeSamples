@@ -4,6 +4,9 @@
 #include <fstream>
 #include <iostream>
 
+// uncomment to view ball speed and if playing Singple Player Hard mode, the "ghost ball" the cpu uses to predict the ball movement
+//#define DEBUG
+
 const sf::Time Game::TimePerFrame = sf::seconds(1.f/60.f);
 
 Game::Game(int WIDTH, int HEIGHT)
@@ -16,7 +19,6 @@ Game::Game(int WIDTH, int HEIGHT)
 	reverseActive = false;
 	if (!font.loadFromFile("Arial.ttf"))
 		std::cout << "Could not load \"Arial.ttf\"" << std::endl;
-	//window.setFramerateLimit(60);
 	width = WIDTH;
 	height = HEIGHT;
 	padding = 5;
@@ -190,9 +192,6 @@ void Game::Run()
 	sf::Clock clock;
 	sf::Time timeSinceLastUpdate = sf::Time::Zero;
 
-	std::ofstream ofp;
-	ofp.open("output.txt", std::ios::trunc);
-
 	clock_t t1;
 	clock_t t2;
 	t1 = std::clock();
@@ -208,8 +207,7 @@ void Game::Run()
 		Render();
 		t2 = std::clock();
 		double diff = t2 - t1;
-		std::cout << diff << " ms\n";
-		ofp << diff << " ms\n";
+		window.setTitle("Ultra Pong - " + std::to_string(diff) + " ms frame time");
 		t1 = t2;
 	}
 }
@@ -481,8 +479,10 @@ void Game::Update(sf::Time elapsedTime)
 		invisBall.setOrigin(sf::Vector2f(10, 10));
 		invisBall.setSpeed(sf::Vector2f(ball.getSpeed().x * 10, ball.getSpeed().y * 10));
 		invisBall.setFillColor(sf::Color::Transparent);
-		//invisBall.setOutlineColor(sf::Color::Yellow);
-		//invisBall.setOutlineThickness(2);
+#ifdef DEBUG
+		invisBall.setOutlineColor(sf::Color::Yellow);
+		invisBall.setOutlineThickness(2);
+#endif
 		invisBall.setPosition(sf::Vector2f(ball.getPosition().x, ball.getPosition().y));
 	}
 	if (shmBoxActive == true && ball.getSpeed().x < 0)
@@ -562,8 +562,10 @@ void Game::Render()
 		window.draw(p1ScoreDisplay);
 		window.draw(p2ScoreDisplay);
 		window.draw(ballHitsDisplay);
-		//window.draw(ballSpeedYDisplay);
-		//window.draw(ballSpeedXDisplay);
+#ifdef DEBUG
+		window.draw(ballSpeedYDisplay);
+		window.draw(ballSpeedXDisplay);
+#endif
 		window.draw(ball);
 		if (invisBall.exists == true)
 			window.draw(invisBall);
@@ -577,8 +579,10 @@ void Game::Render()
 		window.draw(p1ScoreDisplay);
 		window.draw(p2ScoreDisplay);
 		window.draw(ballHitsDisplay);
-		//window.draw(ballSpeedYDisplay);
-		//window.draw(ballSpeedXDisplay);
+#ifdef DEBUG
+		window.draw(ballSpeedYDisplay);
+		window.draw(ballSpeedXDisplay);
+#endif
 		window.draw(ball);
 		window.draw(paused);
 	}
