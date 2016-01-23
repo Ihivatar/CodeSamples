@@ -4,6 +4,8 @@
 #include <time.h>
 #include <stdio.h>
 
+//#define DEBUG
+
 #define PADDING 15
 
 const sf::Time TimePerFrame = sf::seconds(1.0f/60.0f);
@@ -261,9 +263,9 @@ void GenerateBoard(Box** box, int y, int x)
 		{
 			if (box[i][j].Bomb)
 			{
-				box[i][j].text.setString("B");					// shows bombs
+				//box[i][j].text.setString("B");					// shows bombs
 				box[i][j].text.setColor(sf::Color::Transparent);
-				box[i][j].text.setColor(sf::Color::Cyan);			// shows bombs
+				//box[i][j].text.setColor(sf::Color::Cyan);			// shows bombs
 			}
 			//	(i, j)
 			//	(0, 0)	(0, 1)	(0, 2)
@@ -315,8 +317,8 @@ void GenerateBoard(Box** box, int y, int x)
 				{
 					box[i][j].text.setString(std::to_string(box[i][j].Bordering));
 					box[i][j].text.setColor(sf::Color::Transparent);
-					if (box[i][j].Bordering != 0)
-						box[i][j].text.setColor(sf::Color::Red);	// shows all number values
+					//if (box[i][j].Bordering != 0)
+						//box[i][j].text.setColor(sf::Color::Red);	// shows all number values
 				}
 			}
 			//box[i][j].rect.setFillColor(sf::Color(200, 200, 200, 255));
@@ -426,7 +428,7 @@ void PollEvents(sf::RenderWindow& window, Box** board)
 			sf::Vector2f delta;
 			ms = sf::Vector2f(event.mouseMove.x, event.mouseMove.y);
 			delta = ms - prev;
-			if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left) && sf::Mouse::isButtonPressed(sf::Mouse::Button::Right))
+			if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left) && sf::Keyboard::isKeyPressed(sf::Keyboard::LControl))
 			{
 				//view.setCenter(view.getCenter() - delta);
 				view.move(-delta);
@@ -446,7 +448,7 @@ void PollEvents(sf::RenderWindow& window, Box** board)
 				view.zoom(1.25f);
 			}
 		}
-		if (event.type == sf::Event::MouseButtonPressed && event.key.code == sf::Mouse::Left)
+		if (event.type == sf::Event::MouseButtonPressed && event.key.code == sf::Mouse::Left && !sf::Keyboard::isKeyPressed(sf::Keyboard::LControl))
 		{
 			if (gameState == playing)
 			{
@@ -473,7 +475,9 @@ void PollEvents(sf::RenderWindow& window, Box** board)
 								{
 									board[i][j].Visible = true;
 								}
+#ifdef DEBUG
 								printf("Tiles revealed: %i, percent of board: %f\n", counter, (float)counter/totalTiles*100);
+#endif
 							}
 						}
 					}
@@ -612,6 +616,9 @@ int main()
 	sf::Text time;
 	InitText(time, font, 26, sf::Color::Red, "Time: 00", left.getPosition().x + left.getLocalBounds().width + PADDING, 0, NONE);
 
+	sf::Text move;
+	InitText(move, font, 26, sf::Color::Blue, "Hold Left Ctrl and Left Mouse Click to move map", time.getPosition().x + time.getLocalBounds().width + PADDING, 0, NONE);
+
 	Box** board = new Box*[bHeight];
 	for (int k = 0; k < bHeight; ++k)
 		board[k] = new Box[bWidth];
@@ -738,6 +745,7 @@ int main()
 		window.draw(questionRect);
 		window.draw(left);
 		window.draw(time);
+		window.draw(move);
 		window.setView(view);
 		window.display();
 	}
