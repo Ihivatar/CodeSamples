@@ -1,12 +1,11 @@
-// This file was made as a tech demo for the hexlib
-// It uses images distributed from http://adythewolf-play.blogspot.ro/2015/02/hex-tiles-beginning.html
-
 #include <SFML/Graphics.hpp>
 
 #include <unordered_map>
 #include <time.h>
 
 #include "Hex.h"
+
+#define DEBUG
 
 const int WIDTH = 1600;
 const int HEIGHT = 900;
@@ -149,8 +148,6 @@ void DrawLine(std::unordered_map<Hex, Shape>& map, Hex a, Hex b, sf::Color color
 
 void MovePlayer(std::unordered_map<Hex, Shape>& map, Shape& player, Hex dest, sf::Texture* textures)
 {
-	//map[player].hex.setFillColor(sf::Color::Blue);
-	//map[dest].hex.setFillColor(sf::Color::Yellow);
 	player = map[dest];
 	player.id = 4;
 	player.hex.setTexture(&textures[player.id]);
@@ -208,6 +205,9 @@ int main()
 		{
 			switch (event.type)
 			{
+			case sf::Event::Closed:
+				window.close();
+				break;
 			case sf::Event::KeyPressed:
 				switch (event.key.code)
 				{
@@ -226,9 +226,11 @@ int main()
 					{
 						auto found = hex_map.find(temp)->second;
 						ClearBoard(hex_map, sf::Color::White);
-						//DrawLine(hex_map, player, temp, sf::Color::Red);
+#ifdef DEBUG
+						DrawLine(hex_map, Player.coords, temp, sf::Color::Red);
+						ShowNeighbors(hex_map, temp, sf::Color::Green);
+#endif
 						MovePlayer(hex_map, Player, temp, textures);
-						//ShowNeighbors(hex_map, temp, sf::Color::Green);
 					}
 				}
 			}

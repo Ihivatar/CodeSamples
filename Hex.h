@@ -1,5 +1,7 @@
-// Adapted from the work done by http://www.redblobgames.com/grids/hexagons/
-// modified by me to not use C++ templates
+#pragma once
+
+// This hex library was made based on the hexagonal grid reference at http://www.redblobgames.com/grids/hexagons/
+// it was then extended a bit in the main.cpp file by me
 
 #include <cmath>
 #include <vector>
@@ -11,10 +13,10 @@
 
 struct Point
 {
-    double x;
-    double y;
+    float x;
+    float y;
 
-    Point(double x, double y)
+    Point(float x, float y)
     {
         this->x = x;
         this->y = y;
@@ -51,11 +53,11 @@ struct Hex
 
 struct FractionalHex
 {
-    double q;
-    double r;
-    double s;
+    float q;
+    float r;
+    float s;
 
-    FractionalHex(double q, double r, double s)
+    FractionalHex(float q, float r, float s)
     {
         this->q = q;
         this->r = r;
@@ -79,17 +81,17 @@ struct OffsetCoord
 
 struct Orientation
 {
-	double f0;
-	double f1;
-	double f2;
-	double f3;
-	double b0;
-	double b1;
-	double b2;
-	double b3;
-	double start_angle;
+	float f0;
+	float f1;
+	float f2;
+	float f3;
+	float b0;
+	float b1;
+	float b2;
+	float b3;
+	float start_angle;
 
-	Orientation(double f0, double f1, double f2, double f3, double b0, double b1, double b2, double b3, double start_angle)
+	Orientation(float f0, float f1, float f2, float f3, float b0, float b1, float b2, float b3, float start_angle)
 	{
 		this->f0 = f0;
 		this->f1 = f1;
@@ -175,9 +177,9 @@ Hex HexRound(FractionalHex h)
 	int q = (int)(round(h.q));
 	int r = (int)(round(h.r));
 	int s = (int)(round(h.s));
-	double q_diff = abs(q - h.q);
-	double r_diff = abs(r - h.r);
-	double s_diff = abs(s - h.s);
+	float q_diff = abs(q - h.q);
+	float r_diff = abs(r - h.r);
+	float s_diff = abs(s - h.s);
 	if (q_diff > r_diff && q_diff > s_diff)
 	{
 		q = -r - s;
@@ -194,7 +196,7 @@ Hex HexRound(FractionalHex h)
 	return Hex(q, r, s);
 }
 
-FractionalHex HexLerp(Hex a, Hex b, double t)
+FractionalHex HexLerp(Hex a, Hex b, float t)
 {
 	return (FractionalHex(a.q + (b.q - a.q) * t, a.r + (b.r - a.r) * t, a.s + (b.s - a.s) * t));
 }
@@ -203,7 +205,7 @@ std::vector<Hex> HexLineDraw(Hex a, Hex b)
 {
 	int N = Distance(a, b);
 	std::vector<Hex> Result;
-	double step = 1.0f / std::max(N, 1);
+	float step = 1.0f / std::max(N, 1);
 	for (int i = 0; i <= N; ++i)
 	{
 		Result.push_back(HexRound(HexLerp(a, b, step * i)));
@@ -251,8 +253,8 @@ Point HexToPixel(Layout layout, Hex h)
 	Orientation M = layout.orientation;
 	Point size = layout.size;
 	Point origin = layout.origin;
-	double x = (M.f0 * h.q + M.f1 * h.r) * (size.x / 2.0f);
-	double y = (M.f2 * h.q + M.f3 * h.r) * (size.y / 2.0f);
+	float x = (M.f0 * h.q + M.f1 * h.r) * (size.x / 2.0f);
+	float y = (M.f2 * h.q + M.f3 * h.r) * (size.y / 2.0f);
 
 	return Point(x + origin.x, y + origin.y);
 }
@@ -263,8 +265,8 @@ FractionalHex PixelToHex(Layout layout, Point p)
 	Point size = layout.size;
 	Point origin = layout.origin;
 	Point pt((p.x - origin.x) / size.x, (p.y - origin.y) / size.y);
-	double q = M.b0 * pt.x + M.b1 * pt.y;
-	double r = M.b2 * pt.x + M.b3 * pt.y;
+	float q = M.b0 * pt.x + M.b1 * pt.y;
+	float r = M.b2 * pt.x + M.b3 * pt.y;
 
 	return FractionalHex(q, r, -q - r);
 }
@@ -273,7 +275,7 @@ Point HexCornerOffset(Layout layout, int corner)
 {
 	Orientation M = layout.orientation;
 	Point size = layout.size;
-	double angle = 2.0f * PI * (corner + M.start_angle) / 6.0f;
+	float angle = 2.0f * PI * (corner + M.start_angle) / 6.0f;
 
 	return Point(size.x * cos(angle), size.y * sin(angle));
 }
