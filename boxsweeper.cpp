@@ -78,16 +78,18 @@ void RevealBlanks(Box** box, int i, int j)
 	if (j < 0 || j >= bWidth)
 		return;
 
+	// don't show flagged tiles
 	if (box[i][j].Visible || box[i][j].Flagged || box[i][j].Question)
 		return;
 
 	--clearTiles;
 	box[i][j].Visible = true;
-	if (box[i][j].Bordering != 0)
+	if (box[i][j].Bordering != 0)	// no unrevealed tiles bordering click
 	{
 		return;
 	}
-
+	
+	// recursively check all 8 neighbors for unrevealed tiles
 	if (i >= bWidth || j >= bHeight || i <= 0 || j <= 0)
 		return;
 	if (!box[i][j-1].Visible)
@@ -263,9 +265,11 @@ void GenerateBoard(Box** box, int y, int x)
 		{
 			if (box[i][j].Bomb)
 			{
-				//box[i][j].text.setString("B");					// shows bombs
+#ifdef DEBUG
+				box[i][j].text.setString("B");					// shows bombs
+				box[i][j].text.setColor(sf::Color::Cyan);			// shows bombs
+#endif
 				box[i][j].text.setColor(sf::Color::Transparent);
-				//box[i][j].text.setColor(sf::Color::Cyan);			// shows bombs
 			}
 			//	(i, j)
 			//	(0, 0)	(0, 1)	(0, 2)
@@ -317,15 +321,17 @@ void GenerateBoard(Box** box, int y, int x)
 				{
 					box[i][j].text.setString(std::to_string(box[i][j].Bordering));
 					box[i][j].text.setColor(sf::Color::Transparent);
-					//if (box[i][j].Bordering != 0)
-						//box[i][j].text.setColor(sf::Color::Red);	// shows all number values
+#ifdef DEBUG
+					if (box[i][j].Bordering != 0)
+						box[i][j].text.setColor(sf::Color::Red);	// shows all number values
+#endif
 				}
 			}
-			//box[i][j].rect.setFillColor(sf::Color(200, 200, 200, 255));
 		}
 	}
 }
 
+// used to check if a position is within a tile
 bool Within(Box box, sf::Vector2f pos)
 {
 	bool result = false;
@@ -430,12 +436,11 @@ void PollEvents(sf::RenderWindow& window, Box** board)
 			delta = ms - prev;
 			if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left) && sf::Keyboard::isKeyPressed(sf::Keyboard::LControl))
 			{
-				//view.setCenter(view.getCenter() - delta);
-				view.move(-delta);
+				view.move(-delta);	// drag map
 			}
 			prev = ms;
 		}
-		if (event.type == sf::Event::MouseWheelMoved)
+		if (event.type == sf::Event::MouseWheelMoved)	// zoom map
 		{
 			if (event.mouseWheel.delta > 0)
 			{
@@ -448,6 +453,7 @@ void PollEvents(sf::RenderWindow& window, Box** board)
 				view.zoom(1.25f);
 			}
 		}
+		// standard left click
 		if (event.type == sf::Event::MouseButtonPressed && event.key.code == sf::Mouse::Left && !sf::Keyboard::isKeyPressed(sf::Keyboard::LControl))
 		{
 			if (gameState == playing)
@@ -587,6 +593,7 @@ int main()
 	sf::Font font;
 	if (!font.loadFromFile("Arial.ttf"))
 	{
+		printf("Could not load font 'Arial.ttf'\n");
 	}
 
 	sf::Text win;
@@ -658,11 +665,12 @@ int main()
 			if (bombFlags == bombs)
 			{
 				bool ok = true;
+				// check to see if all flagged tiles are actually bombs
 				for (int i = 0; i < bHeight; ++i)
 				{
 					for (int j = 0; j < bWidth; ++j)
 					{
-						if (board[i][j].Bomb && !board[i][j].Flagged)
+						if (board[i][j].Bomb && !board[i][j].Flagged)	// a bomb isn't flagged and a flagged tile isn't a bomb
 						{
 							wrong.setColor(sf::Color::Green);
 							ok = false;
@@ -690,6 +698,7 @@ int main()
 				mark = timer.asSeconds();
 			}
 
+			// check to see if a bomb was revealed
 			for (int i = 0; i < bHeight; ++i)
 			{
 				for (int j = 0; j < bWidth; ++j)
