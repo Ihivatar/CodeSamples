@@ -106,5 +106,4 @@ private:	// graphics and sounds
 	Ball invisBall;
 
 	Physics phys;
-	// images and sounds go here
 };
